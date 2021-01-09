@@ -129,22 +129,6 @@ def run_code(code, values, line, funs, fun_values, b_fun):
         elif symbol == '/':
             vaule = num1//num2
         values.update({name: vaule})
-
-def file_load():
-    global file
-    try:
-        file = pic.load(open('file.pkl', 'rb'))
-    except EOFError:
-        return None
-    except FileNotFoundError:
-        fi = open('file.pkl', 'wb')
-        print('No such a virtual file')
-        cmd.re_start()
-    return file
-
-
-file_load()
-
 try:
     name_pass = pic.load(open('user_pass.pkl', 'rb'))
     while 1:
@@ -191,7 +175,7 @@ except EOFError:
     np_file = open('user_pass.pkl', 'wb')
     name = ''
     pass_ = ''
-    print('Username:')
+    print('Reg:\nUsername:')
     while 1:
         char = m.getch()
         if not char == b'\xff':
@@ -226,7 +210,7 @@ except FileNotFoundError:
     np_file = open('user_pass.pkl', 'wb')
     name = ''
     pass_ = ''
-    print('Username:')
+    print('Reg:\nUsername:')
     while 1:
         char = m.getch()
         if not char == b'\xff':
@@ -833,5 +817,18 @@ class Comd():  # 代码类
         else:
             self.workspace = p_li
 cmd = Comd([])
+def file_load():
+    global file
+    try:
+        fi=open('file.pkl', 'rb')
+        file = pic.load(fi)
+    except EOFError:
+        return None
+    except FileNotFoundError:
+        fi = open('file.pkl', 'wb')
+        print('No such a virtual file')
+        cmd.re_start()
+    return file
+file_load()
 while 1:
     main()
