@@ -129,6 +129,8 @@ def run_code(code, values, line, funs, fun_values, b_fun):
         elif symbol == '/':
             vaule = num1//num2
         values.update({name: vaule})
+
+
 try:
     name_pass = pic.load(open('user_pass.pkl', 'rb'))
     while 1:
@@ -235,22 +237,30 @@ except FileNotFoundError:
                 name += key_dict.get(char)
     pic.dump({name: pass_}, np_file)
     np_file.close()
-workspace=[]
+print('')
+workspace = []
+
+
 def main():
-    workspace=cmd.workspace.copy()
+    workspace = cmd.workspace.copy()
     command = input('/'+re_path(workspace)+'>>>').split(' ')
-    workspace=cmd.workspace.copy()
+    workspace = cmd.workspace.copy()
     c_vs = command[1:]
     if command[0] in list(command_dict.keys()):
-        if len(c_vs) == command_dict[command[0]][1]:
+        if len(c_vs) in command_dict[command[0]][1]:
             for n in command_dict[command[0]][2]:
                 try:
                     if not c_vs[n][0] == '/':
-                        a='/'+re_path(workspace)+c_vs[n]
+                        a = '/'+re_path(workspace)+c_vs[n]
+                        workspace = cmd.workspace.copy()
                         c_vs[n] = a
                 except IndexError:
-                    print('Lose/More values!!')
-                    return None
+                    if len(c_vs) == 0:
+                        c_vs.append('/'+re_path(workspace))
+                        workspace = cmd.workspace.copy()
+                    else:
+                        print('Lose/More values!')
+                        return None
             c_vs = str(c_vs)[1:-1]
             exec(f'cmd.{command_dict[command[0]][0]}({c_vs})')
         else:
@@ -260,25 +270,29 @@ def main():
         print('Unknow command!!')
         return None
 
+
 command_dict = {
-    'vim': ['vim', 1, [0]],
-    'list': ['list', 1, [0]],
-    'show': ['show', 1, [0]],
-    'new': ['new', 3, [0]],
-    'remove': ['remove', 1, [0]],
-    'rename': ['rename', 2, [0]],
-    'move': ['move', 2, [0, 1]],
-    'restart': ['re_start', 0, []],
-    'bwp': ['bwp', 1, [0]],
-    'png_to_bwp': ['png_to_bwp', 1, []],
-    'run': ['run', 1, [0]],
-    'help': ['help', 1, []],
-    'jump': ['jump', 1, [0]]
+    'vim': ['vim', [1], [0]],
+    'list': ['list', [1, 0], [0]],
+    'show': ['show', [1], [0]],
+    'new': ['new', [3], [0]],
+    'remove': ['remove', [1], [0]],
+    'rename': ['rename', [2], [0]],
+    'move': ['move', [2], [0], [1]],
+    'restart': ['re_start', [0], []],
+    'bwp': ['bwp', [1], [0]],
+    'png_to_bwp': ['png_to_bwp', [1], []],
+    'run': ['run', [1], [0]],
+    'help': ['help', [1], []],
+    'jump': ['jump', [1], [0]],
+    'table': ['table', [1], [0]]
 }
 
+
 class Comd():  # 代码类
-    def __init__(self,workspace):
-        self.workspace=workspace
+    def __init__(self, workspace):
+        self.workspace = workspace
+
     def vim(self, p):  # 编写文本
         p_li = path(p)
         file_load()
@@ -360,6 +374,8 @@ class Comd():  # 代码类
                             spoint += 1
 
         if mode == 'wq':
+            if not re.search('^#.*\n', doc):
+                doc = '#txt\n'+doc
             file_c = file
             for n in range(len(p_li)-1):  # 使用复制进行更改
                 file_c = file_c.copy()[p_li[n]]
@@ -371,7 +387,7 @@ class Comd():  # 代码类
             f.close()
             print('Save successful')
 
-        else:
+        elif mode == 'q':
             os.system('cls')
             print('Only Quit')
             doc = None
@@ -543,7 +559,6 @@ class Comd():  # 代码类
         except KeyError:
             print('Erorr Old_Path')
             return None
-        print(last)
         try:
             value = last[o_p[-1]]
         except:
@@ -563,9 +578,13 @@ class Comd():  # 代码类
             mode = 'file'
         elif type(value) == type({'s': 1}):
             mode = 'folder'
+        try:
+            key = n_p.pop()
+        except IndexError:
+            print('Error Path')
+            return None
         self.remove(old)
-        key = n_p.pop()
-        self.new(new, mode, last[o_p[-1]][:-1])
+        self.new(new, mode, re.search('^#.*\n', value).group()[1:-1])
         file_c = file
         for n in range(len(n_p)):  # 使用复制进行更改
             file_c = file.copy()[n_p[n]]
@@ -650,15 +669,16 @@ class Comd():  # 代码类
         help = {'vim': ('To write a file(txt,bwp,...)', '*(path of file)'),
                 'list': ('To list all of file or folder under folder', '*(path of folder)'),
                 'show': ('To show the content of the file', '*(path of file)'),
-                'new': ('To new a file or folder', '*(path of file/folder,mode=fileor folder,type of th file(the type of folder is " "))'),
+                'new': ('To new a file or folder', '*(path of file/folder,mode=fileor folder,type of the file(the type of folder is " "))'),
                 'remove': ('To remove a file or folder', '*(path of file or folder)'),
                 'rename': ('To rename a file or folder', '*(path of file or folder)'),
                 'move': ('To move a file or folder to the other place', '*(path of file or folder,new path(You can change the name of the file))'),
                 'png_to_bwp': ('To change a picture into a bwp file(only black and white)', '*(path of picture in the real PC)'),
                 'bwp': ('To read a bwp file', '*(path of the bwp file)'),
-                're_start': ('To make the PC change into new', '*(NO)'),
+                're_start': ('To change the PC change into new', '*(NO)'),
                 'run': ('To run a code file', '*(path of the code file)'),
-                'jump': ('jump form a folder to the other folder', '*(path)')
+                'jump': ('To jump form a folder to the other folder', '*(path)'),
+                'table' : ('To edit a table file and new a table file', '*(path)')
                 }
         if helper == 'all':
             for key in help.keys():
@@ -816,11 +836,168 @@ class Comd():  # 代码类
             print('The path is not folder')
         else:
             self.workspace = p_li
+
+    def table(self, p):
+        """
+        edit a table file
+        """
+        p_li = path(p)
+        last = file
+        table_dict = {}
+        x__max = 10
+        x__min = 1
+        y__max = 10
+        y__min = 1
+        spoint = [1, 1]
+        try:
+            for n in range(len(p_li)):
+                last = last[p_li[n]]
+        except KeyError:
+            self.new(re_path(path(p)), 'file', 'table')
+            file_load()
+            last = file
+            try:
+                for n in range(len(p_li)):
+                    last = last[path(p)[n]]
+                file_load()
+            except KeyError:
+                print('Error Path')
+                return None
+        if not re.search('^#table\n', last):
+            print("It's not a table file!")
+            return None
+        last = last.split('\n')[1:]
+        if last[0]:
+            for n in last:
+                sp = re.search('\)', n).span()[0]
+                table_dict.update({eval(n[:sp+1]): n[sp+1:]})
+            print(table_dict)
+        x_max = 0
+        for n in table_dict.keys():
+            if n[0] >= x_max:
+                x_max = n[0]
+        y_max = 0
+        for n in table_dict.keys():
+            if n[0] >= y_max:
+                y_max = n[0]
+        while 1:
+            char = m.getch()
+            if char == b'\xe0':
+                sp = m.getch()
+                if sp == b'K':
+                    if spoint[0]-1 <= 0:
+                        spoint[0] = 1
+                    else:
+                        spoint[0] -= 1
+                if sp == b'M':
+                    spoint[0] += 1
+                if sp == b'H':
+                    if spoint[1]-1 <= 0:
+                        spoint[1] = 1
+                    else:
+                        spoint[1] -= 1
+                if sp == b'P':
+                    spoint[1] += 1
+            elif char == b'f':
+                try:
+                    sp = eval(input('Goto:'))
+                except SyntaxError:
+                    pass
+                if type(sp) == type((1, 2)):
+                    try:
+                        spoint[0] = sp[0]
+                        spoint[1] = sp[1]
+                    except IndexError:
+                        pass
+            elif char == b'i':
+                value = table_dict.get(tuple(spoint))
+                if not value:
+                    value = ''
+                while 1:
+                    sys.stdout.write('\r{}'.format(value))
+                    sys.stdout.flush()
+                    char = m.getch()
+                    if char in list(key_dict.keys()):
+                        value = value+key_dict[char]
+                        sys.stdout.write('{}'.format(key_dict[char]))
+                        sys.stdout.flush()
+                    elif char == b'\x08':
+                        value = value[:-1]
+                        sys.stdout.write('\b')
+                        sys.stdout.flush()
+                    elif char == b'\r':
+                        break
+                table_dict.update({tuple(spoint): value})
+            elif char == b'\x1b':
+                os.system('cls')
+                print(table_dict)
+                break
+            elif char == b's':
+                doc = '#table'
+                print('SAVING')
+                for n in table_dict.items():
+                    doc += '\n{} {}'.format(n[0], n[1])
+                file_c = file
+                for n in range(len(p_li)-1):  # 使用复制进行更改
+                    file_c = file_c.copy()[p_li[n]]
+                file_c[p_li[len(p_li)-1]] = doc
+                f = open('file.pkl', 'wb')
+                pic.dump(file, f)
+                f.close()
+                print('Save successful')
+            x__min = 1 if spoint[0] <= 10 else spoint[0]-10
+            x__max = 10 if spoint[0] <= 10 else 10+spoint[0]-10
+            y__min = 1 if spoint[1] <= 10 else spoint[1]-10
+            y__max = 10 if spoint[1] <= 10 else 10+spoint[1]-10
+            os.system('cls')
+            for y in range(y__min-1, y__max+1):
+                print("-"*130)
+                for x in range(x__min-1, x__max+1):
+                    if y == y__min-1:
+                        if x == x__min-1:
+                            print(' '*10+'|', end='')
+                        else:
+                            a = ' '*((10-len(str(x)))//2)+str(x) + \
+                                ' ' * ((10-len(str(x)))//2)
+                            if len(a) < 10:
+                                a += ' '
+                            elif len(a) > 10:
+                                a += '\b'
+                            print(a+'|', end='')
+                    else:
+                        value = table_dict.get((x, y))
+                        if not value:
+                            value = ''
+                        if x == x__min-1:
+                            a = ' '*((10-len(str(y)))//2)+str(y) + \
+                                ' ' * ((10-len(str(y)))//2)
+                            if len(a) < 10:
+                                a += ' '
+                            elif len(a) > 10:
+                                a += '\b'
+                            print(a+'|', end='')
+                        else:
+                            a = ' '*((10-len(value))//2) + \
+                            value+' '*((10-len(value))//2)
+                            if len(a) < 10:
+                                a += ' '
+                            elif len(a) > 10:
+                                a += '\b'
+                            if x == spoint[0] and y == spoint[1]:
+                                print('\b#'+a+'#', end='')
+                            else:
+                                print(a+'|', end='')
+                print('\n')
+            print(spoint)
+
+
 cmd = Comd([])
+
+
 def file_load():
     global file
     try:
-        fi=open('file.pkl', 'rb')
+        fi = open('file.pkl', 'rb')
         file = pic.load(fi)
     except EOFError:
         return None
@@ -829,6 +1006,8 @@ def file_load():
         print('No such a virtual file')
         cmd.re_start()
     return file
+
+
 file_load()
 while 1:
     main()
