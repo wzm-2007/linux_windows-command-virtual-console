@@ -10,6 +10,8 @@ c) You can vim start_run to edit a start run file(Start when the PC trun on).
 
 d) user/help_doc is a simple help file.
 
+e)Try help vim/help table!!
+
 ## v2.0
 
 Add a command "table"
