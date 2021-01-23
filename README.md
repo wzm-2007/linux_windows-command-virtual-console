@@ -1,9 +1,9 @@
 # liunx_windows-command-virtual-console
 ## v2.5
-a) Add a command "nick"/"app"/"st".\n
-b) Add a dir "downloads" to put by app file(py files).\n
-c) You can vim start_run to edit a start run file(Start when the PC trun on).\n
-d) user/help_doc is a simple help file.\n
+a) Add a command "nick"/"app"/"st".\r
+b) Add a dir "downloads" to put by app file(py files).\r
+c) You can vim start_run to edit a start run file(Start when the PC trun on).\r
+d) user/help_doc is a simple help file.\r
 ## v2.0
 Add a command "table"
 
