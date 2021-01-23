@@ -1,4 +1,4 @@
-# liunx_windows-command-virtual-console
+# liunx_windows-command-virtual-console(Type "help" to get help)
 
 ## v2.5
 
