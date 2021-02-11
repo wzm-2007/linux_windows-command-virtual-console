@@ -2,11 +2,11 @@
 
 ## v3.0
 
-> Add more app (clear,tree,find)\[Try to type 'help \[app name\]' to get help\]
+1. Add more app (clear,tree,find)\[Try to type 'help \[app name\]' to get help\]
 
-> Change the name of 'show' to 'print'
+2. Change the name of 'show' to 'print'
 
-> You an use 'app install \[app name\]' to install app.
+3. You an use 'app install \[app name\]' to install app.
 
 
 ## v2.5
