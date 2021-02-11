@@ -2,6 +2,8 @@
 
 ## v3.0
 
+> You can use the only file.
+
 > Add more app (clear,tree,find) (Try to type 'help \[app name\]' to get help)      **!!'app_dict.txt' is not a app file**
 
 > Change the name of 'show' to 'print'
