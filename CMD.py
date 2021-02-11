@@ -815,7 +815,7 @@ class Comd():  # 代码类
                     print('[Rm]:Error path')
                     return None
             else:
-                if file_TF([fil]):
+                if file_TF(p_li):
                     re_name_use = list({fil: file.pop(fil)}.values())[0]
                 else:
                     print('[Rm]:Error path')
