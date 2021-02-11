@@ -2,7 +2,7 @@
 
 ## v3.0
 
-> Add more app (clear,tree,find) (Try to type 'help \[app name\]' to get help)
+> Add more app (clear,tree,find) (Try to type 'help \[app name\]' to get help) **!!'app_dict.txt' is not a app file**
 
 > Change the name of 'show' to 'print'
 
