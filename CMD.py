@@ -1,4 +1,5 @@
 #!usr/bin/python3
+from threading import Timer
 import urllib.request
 import hashlib
 import time
@@ -45,6 +46,7 @@ gui_get_folder_value = ''
 
 help_dict = {'app': ('App command.', 'app <list|uninstall|reload> [the name of the app that will be uninstalled]'),
              'bwp': ('To read a bwp file', 'bwp <path of the bwp file>'),
+             'check': ('To check the update!', 'check'),
              'jump': ('To jump from a folder to the other folder', 'jump <path of a folder>)'),
              'list': ('To list all of file or folder under folder', 'list <path of folder>'),
              'move': ('To move a file or folder to the other place', 'move <path> <new path(Need a new name)>'),
@@ -74,7 +76,7 @@ def ynbox(msg):
         return False
 
 
-def choose_box(list, msg='Choose:', mode='num'):
+def choose_box(list, msg='Choose:', mode='num'):            #......  Y/N
     """
     pick up a choise
     """
@@ -117,7 +119,44 @@ def choose_box(list, msg='Choose:', mode='num'):
     return temp-1
 
 
-def path(p):  # 转化路径
+try:
+    url = urllib.request.Request(f'https://github.com/wzm-2007/liunx_windows-command-virtual-console/blob/main/CMD.py')
+    response = urllib.request.urlopen(url)
+    html = response.read().decode('utf-8')
+    gra = re.findall('''<td id="LC\d*" class="blob-code blob-code-inner js-file-line">.*</td>''',html)
+    last_gra = ''
+    for j in gra:
+        try:
+            tab = re.search('>\s*<',re.search('<td id="LC\d*" class="blob-code blob-code-inner js-file-line">\s*<span class="pl-.*">',j).group()).group()[1:-1]
+        except AttributeError:
+            tab = ''
+        j=re.sub('<td id="LC\d*" class="blob-code blob-code-inner js-file-line">\s*','',j)
+        j=re.sub('</span>','',j)
+        j=re.sub('<span class="pl-.*?">','',j)
+        j = j.replace('\n','')
+        j = j.replace('</td>','')
+        j.replace('&#39;','"')
+        last_gra += f'{tab}{j}\n'
+except urllib.error.URLError:
+    print('\nPlease Check Your Internet!!\n')
+    print('\a')
+else:
+    print(gra)
+    old_gra = open(__file__,'r',encoding='utf-8')
+    if gra != old_gra.read():
+        if ynbox(msg='We find a update!Are you sure to update?'):
+            print('')
+            old_gra = open(__file__,'w',encoding='utf-8')
+            old_gra.write(gra)
+            old_gra.close()
+            os.system(f'python {CMD_NAME}')
+            os.system('cls')
+            exit(0)
+        else:
+            print('')
+
+
+def path(p):  # 转化路径    /user/help_doc ------> ['user','help_doc']
     path_list = []
     p = p[:]
     try:
@@ -134,7 +173,7 @@ def path(p):  # 转化路径
     return path_list
 
 
-def re_path(p_li):  # 反路径
+def re_path(p_li):  # 反路径  ['user','help_doc'] ----> 'user/help_doc'
     p = ''
     p_li = p_li[:]
     p_li.reverse()
@@ -209,7 +248,7 @@ def gui_get_file(path_='/', type_=''):
                 fi_fol = choose_box(['folder', 'file'],
                                     msg='File or folder---', mode='letter')
                 if fi_fol == 1:
-                    print('\n', end='')
+                    print('')
                     type_file = input('Type:')
                 else:
                     type_file = 'folder'
@@ -255,7 +294,7 @@ def gui_get_file(path_='/', type_=''):
                         gui_get_file_value = None
                     else:
                         gui_get_file(path_, type_)
-                    print('\n', end='')
+                    print('')
                 else:
                     if not temp_f_l:
                         temp_f_l = ['']
@@ -361,7 +400,7 @@ def gui_get_folder(path_='/'):
                         gui_get_folder_value = None
                     else:
                         gui_get_folder(path_)
-                    print('\n', end='')
+                    print('')
                 else:
                     if not temp_f_l:
                         temp_f_l = ['']
@@ -480,7 +519,8 @@ command_dict = {
     'table': ['table', [1], [0]],
     'nick': ['nick', [2], []],
     'st': ['shut_down', [0], []],
-    'app': ['app', [1, 2], []]
+    'app': ['app', [1, 2], []],
+    'check': ['check',[0],[]]
 }
 
 
@@ -718,13 +758,13 @@ class Comd():  # 代码类
             if type(last[key]) == type('s'):
                 a = re.search(r'^#.*|^#.*\n', last[key]).span()[1]
                 if re.search(r'^#.*\n', last[key]):
-                    print(key, end='                       ' +
-                          last[key][:a]+' file\n')
+                    print(key+'                       ' +
+                          last[key][:a]+' file')
                 else:
-                    print(key, end='                       ' +
-                          last[key]+' file\n')
+                    print(key+'                       ' +
+                          last[key]+' file')
             elif type(last[key]) == type({}):
-                print(key, end='                       #folder\n')
+                print(key+'                       #folder\n')
         if not last.keys():
             print('|', "There is nothing at all!!".center(20, '*'), '|')
         return None
@@ -966,7 +1006,6 @@ class Comd():  # 代码类
             for n in range(3, 0, -1):
                 print(n)
                 time.sleep(1)
-                file_load()
         except KeyboardInterrupt:
             pass
         else:
@@ -1371,7 +1410,7 @@ class Comd():  # 代码类
                 for x in range(x__min-1, x__max+1):
                     if y == y__min-1:
                         if x == x__min-1:
-                            print(' '*10+'|', end='')
+                            print(' '*10+'|'+'')
                         else:
                             a = ' '*((10-len(str(x)))//2)+str(x) + \
                                 ' ' * ((10-len(str(x)))//2)
@@ -1379,7 +1418,7 @@ class Comd():  # 代码类
                                 a += ' '
                             elif len(a) > 10:
                                 a += '\b'
-                            print(a+'|', end='')
+                            print(a+'|'+'')
                     else:
                         value = table_dict.get((x, y))
                         if not value:
@@ -1391,7 +1430,7 @@ class Comd():  # 代码类
                                 a += ' '
                             elif len(a) > 10:
                                 a += '\b'
-                            print(a+'|', end='')
+                            print(a+'|'+'')
                         else:
                             a = ' '*((10-len(value))//2) + \
                                 value+' '*((10-len(value))//2)
@@ -1400,9 +1439,9 @@ class Comd():  # 代码类
                             elif len(a) > 10:
                                 a += '\b'
                             if x == spoint[0] and y == spoint[1]:
-                                print('\b#'+a+'#', end='')
+                                print('\b#'+a+'#'+'')
                             else:
-                                print(a+'|', end='')
+                                print(a+'|'+'')
                 print('\n')
             print(spoint)
             char = m.getch()
@@ -1535,36 +1574,76 @@ class Comd():  # 代码类
                 else:
                     print(f'[App]:Unknow app name--{app_name}')
             elif mode == 'install':
-                if app_name in app_dict.keys():
-                    app_name = app_dict[app_name]
-                    try:
-                        url = urllib.request.Request(f'https://ghostbin.com/paste/{app_name}', headers={
-                                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0'})
-                        response = urllib.request.urlopen(url)
-                    except ValueError:
-                        print(f'[App]:No such a app is named--{app_name}')
-                    except urllib.error.HTTPError:
-                        print(f'[App]:No such a app is named--{app_name}')
+                if app_dict:
+                    if app_name in app_dict.keys():
+                        app_name = app_dict[app_name]
+                        try:
+                            url = urllib.request.Request(f'https://ghostbin.com/paste/{app_name}', headers={
+                                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0'})
+                            response = urllib.request.urlopen(url)
+                        except ValueError:
+                            print(f'[App]:No such a app is named--{app_name}')
+                        except urllib.error.HTTPError:
+                            print(f'[App]:No such a app is named--{app_name}')
+                        else:
+                            html = response.read().decode('utf-8')
+                            f_n = re.search(
+                                '<div class="container">\n<h4>.*</h4>', html).group()[28:-5]
+                            app_code = html[re.search(
+                                '<textarea class="form-control" id="paste" name="paste" disabled>.*', html).span()[0]+64:re.search('</textarea>', html).span()[0]].replace('&#39;', '"')
+                            fi = open(f'downloads\\{f_n}', 'w')
+                            fi.write(app_code)
+                            fi.close()
+                            main(['app', 'reload'])
                     else:
-                        html = response.read().decode('utf-8')
-                        f_n = re.search(
-                            '<div class="container">\n<h4>.*</h4>', html).group()[28:-5]
-                        app_code = html[re.search(
-                            '<textarea class="form-control" id="paste" name="paste" disabled>.*', html).span()[0]+64:re.search('</textarea>', html).span()[0]].replace('&#39;', '"')
-                        fi = open(f'downloads\\{f_n}', 'w')
-                        fi.write(app_code)
-                        fi.close()
-                        main(['app', 'reload'])
+                        print(f'[App]:Unknow app name--{app_name}')
                 else:
-                    print(f'[App]:Unknow app name--{app_name}')
+                    print('\nPlease Check Your Internet!!\n')
+                    print('\a')
             else:
                 print('[App]:Unknow mode')
         else:
             print('[App]:Lost app name.')
+    
+    def check(self):
+        try:
+            url = urllib.request.Request(f'https://github.com/wzm-2007/liunx_windows-command-virtual-console/blob/main/CMD.py', headers={
+                                                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0'})
+            response = urllib.request.urlopen(url)
+            html = response.read().decode('utf-8')
+            gra = re.findall('''<td id="LC\d*" class="blob-code blob-code-inner js-file-line">.*</td>''',html)
+            last_gra = ''
+            for j in gra:
+                try:
+                    tab = re.search('>\s*<',re.search('<td id="LC\d*" class="blob-code blob-code-inner js-file-line">\s*<span class="pl-.*">',j).group()).group()[1:-1]
+                except AttributeError:
+                    tab = ''
+                j=re.sub('<td id="LC\d*" class="blob-code blob-code-inner js-file-line">\s*','',j)
+                j=re.sub('</span>','',j)
+                j=re.sub('<span class="pl-.*?">','',j)
+                j = j.replace('\n','')
+                j = j.replace('</td>','')
+                j.replace('&#39;','"')
+                last_gra += f'{tab}{j}\n'
+        except urllib.error.URLError:
+            print('\nPlease Check Your Internet!!\n')
+            print('\a')
+        else:
+            old_gra = open(__file__,'r',encoding='utf-8')
+            if gra != old_gra.read():
+                if ynbox(msg='We find a update!Are you sure to update?'):
+                    print('')
+                    old_gra = open(__file__,'w',encoding='utf-8')
+                    old_gra.write(gra)
+                    os.system(f'python {CMD_NAME}')
+                    os.system('cls')
+                    exit(0)
+                else:
+                    print('')
 
 
-def file_TF(p_li):
-    last = file
+def file_TF(p_li):          #p_li ---> ['user','txt']
+    last = file_load()
     if not p_li:
         p_li = []
     try:
@@ -1576,7 +1655,7 @@ def file_TF(p_li):
         return last
 
 
-def get_type(doc):
+def get_type(doc):          #doc ---> string 
     if type(doc) == type('s'):
         if re.search('^#.*\n|^#.*', doc):
             f_type = re.search('^#.*\n|^#.*', doc).group()
@@ -1602,15 +1681,21 @@ def file_set(doc, p_li):
     f.close()
     file_load()
 
-
-def main(command, mode=0):
+def app_check():
     global app_dict
-    url = urllib.request.Request(f'https://github.com/wzm-2007/liunx_windows-command-virtual-console/blob/main/downloads/app_dict.txt', headers={
-                                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0'})
-    response = urllib.request.urlopen(url)
-    html = response.read().decode('utf-8')
-    app_dict = re.search('''<td id="LC1" class="blob-code blob-code-inner js-file-line">.*</td>''',html).group()[60:-5].replace('&#39;','"')
-    app_dict = eval(app_dict)
+    try:
+        url = urllib.request.Request(f'https://github.com/wzm-2007/liunx_windows-command-virtual-console/blob/main/downloads/app_dict.txt', headers={
+                                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:85.0) Gecko/20100101 Firefox/85.0'})
+        response = urllib.request.urlopen(url)
+        html = response.read().decode('utf-8')
+        app_dict = re.search('''<td id="LC1" class="blob-code blob-code-inner js-file-line">.*</td>''',html).group()[60:-5].replace('&#39;','"')
+        app_dict = eval(app_dict)
+    except urllib.error.URLError:
+        if not app_dict:
+            print('\nPlease Check Your Internet!!\n')
+            print('\a')
+
+def main(command, mode=0):                  #command ----> ['test'] / ['move','a','user/a']
     file_load()
     command_dict = cmd.command_dict.copy()
     workspace = cmd.workspace.copy()
@@ -1650,12 +1735,9 @@ def main(command, mode=0):
                 exec(f'cmd.{command_dict[command[0]][0]}({c_vs})')
             except AttributeError:
                 module = command_dict[command[0]][0]
-                try:
-                    exec(f'from downloads import {module}')
-                    exec(
-                        f'{command_dict[command[0]][0]}.{command_dict[command[0]][0]}({c_vs})')
-                except:
-                    print(f'Runtime Error:{module}')
+                exec(f'from downloads import {module}')
+                exec(
+                    f'{command_dict[command[0]][0]}.{command_dict[command[0]][0]}({c_vs})')
         else:
             if mode == 0:
                 print('Lose/More values!!')
@@ -1677,7 +1759,9 @@ def file_load():
         fi = open('file.pkl', 'rb')
         file = pic.load(fi)
     except EOFError:
-        return None
+        fi = open('file.pkl', 'wb')
+        print('No such a virtual file')
+        cmd.re_start()
     except FileNotFoundError:
         fi = open('file.pkl', 'wb')
         print('No such a virtual file')
